@@ -1,0 +1,681 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, 
+                Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .photos-window {
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .window-header {
+            height: 28px;
+            background: linear-gradient(to bottom, #f0f0f0, #e1e1e1);
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            border-radius: 10px 10px 0 0;
+            position: relative;
+        }
+
+        .window-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .window-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .close-button {
+            background-color: #ff5f57;
+            border: 1px solid #e0443e;
+        }
+
+        .minimize-button {
+            background-color: #ffbd2e;
+            border: 1px solid #dea123;
+        }
+
+        .maximize-button {
+            background-color: #28c941;
+            border: 1px solid #1aab29;
+        }
+
+        .photos-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 240px;
+            background-color: #f5f5f7;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 10px 0;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 15px;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 0 5px;
+        }
+
+        .sidebar-item:hover {
+            background-color: #e5e5e5;
+        }
+
+        .sidebar-item.active {
+            background-color: #d9d9d9;
+        }
+
+        .sidebar-item img {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+        }
+
+        .sidebar-section {
+            font-size: 12px;
+            color: #888;
+            padding: 10px 15px 5px;
+            margin-top: 5px;
+        }
+
+        .disclosure-triangle {
+            width: 8px;
+            height: 8px;
+            margin-right: 5px;
+            display: inline-block;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        .disclosure-triangle.open {
+            transform: rotate(90deg);
+        }
+
+        .albums-list, .media-types-list {
+            margin-left: 10px;
+            display: none;
+        }
+
+        .albums-list.open, .media-types-list.open {
+            display: block;
+        }
+
+        .album-item, .media-type-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 15px;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 2px 5px;
+        }
+
+        .album-item:hover, .media-type-item:hover {
+            background-color: #e5e5e5;
+        }
+
+        .album-item.active, .media-type-item.active {
+            background-color: #d9d9d9;
+        }
+
+        .album-item img, .media-type-item img {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+        }
+
+        .sidebar-utilities, .sidebar-sharing {
+            margin-top: auto;
+            border-top: 1px solid #e0e0e0;
+            padding-top: 10px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .toolbar {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .toolbar-button {
+            width: 30px;
+            height: 30px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+        }
+
+        .toolbar-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .toolbar-button img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .toolbar-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: #f0f0f0;
+            border-radius: 15px;
+            padding: 5px 10px;
+            width: 200px;
+        }
+
+        .search-bar img {
+            width: 14px;
+            height: 14px;
+            margin-right: 5px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            border: none;
+            background-color: transparent;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .album-view {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .album-header {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+
+        .album-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .album-details {
+            font-size: 14px;
+            color: #666;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Add some spacing between year sections */
+        .year-section {
+            margin-bottom: 40px;
+        }
+
+        /* Make the photo grid look better with just 2 photos */
+        .album-photos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .photo-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .photo-item:hover img {
+            transform: scale(1.03);
+        }
+
+        .favorite-button {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 30px;
+            height: 30px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .photo-item:hover .favorite-button {
+            opacity: 1;
+        }
+
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            display: none;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox-img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+        }
+
+        .filter-dropdown {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            margin-left: auto;
+        }
+
+        .filter-label {
+            margin-right: 5px;
+        }
+
+        .filter-value {
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .filter-value::after {
+            content: "▾";
+            margin-left: 5px;
+        }
+
+        /* Image placeholders */
+        .photo-placeholder {
+            background-color: #f0f0f0;
+            width: 100%;
+            height: 0;
+            padding-bottom: 75%;
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* For demonstration, we'll use generated colors for placeholders */
+        .photo-placeholder:nth-child(odd) {
+            background-color: #e5e5e5;
+        }
+
+        /* Add a heart icon for favorite button */
+        .heart-icon {
+            width: 20px;
+            height: 20px;
+            color: #999;
+        }
+
+        .heart-icon.active {
+            color: #ff3b30;
+            fill: #ff3b30;
+        }
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="photos-window">
+        <div class="window-header">
+            <div class="window-buttons">
+                <div class="window-button close-button" id="close"></div>
+                <div class="window-button minimize-button" id="minimize"></div>
+                <div class="window-button maximize-button" id="maximize"></div>
+            </div>
+        </div>
+        
+        <div class="photos-content">
+            <div class="sidebar">
+                <div class="sidebar-item" id="show-all">Library</div>
+                <div class="sidebar-item" id="show-favorites">Favorites</div>
+            </div>
+            
+            <div class="main-content">
+                <div class="toolbar">
+                    <div class="toolbar-title">Library</div>
+                </div>
+                
+                <div class="album-view">
+                    <div class="album-header">
+                        <h1 class="album-title">All Photos</h1>
+                        <div class="album-details">
+                            <span>{{ photos.count }} Photos</span>
+                        </div>
+                    </div>
+                    
+                    <div class="album-photos-grid">
+                    {% for photo in photos %}
+                    <div class="photo-item photo-card" data-is-favorite="{{ photo.is_favorite|lower }}">
+                        {% if photo.image %}
+                            <img src="{{ photo.image.url }}" alt="{{ photo.title }}">
+                        {% endif %}
+                        <div class="favorite-button">
+                            <svg class="heart-icon {% if photo.is_favorite %}active{% endif %}" viewBox="0 0 24 24">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+            // Toggle disclosure triangles
+        document.querySelectorAll('.disclosure-triangle').forEach(triangle => {
+            triangle.addEventListener('click', function() {
+                this.classList.toggle('open');
+                const listId = this.parentElement.className.split(' ')[0].replace('-section', '-list');
+                document.querySelector('.' + listId).classList.toggle('open');
+            });
+        });
+
+        const photosData = {
+            "2025": [
+                { id: "2021-1", src: "static/media/photos/IMG_2805.png", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_2825.PNG", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_2794.png", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_1188.png", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_1177.png", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_1133.png", isFavorite: false },
+                { id: "2021-2", src: "static/media/photos/IMG_1075.png", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_1002.png", isFavorite: false },
+                { id: "2021-2", src: "static/media/photos/IMG_0906.png", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_1793.png", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_0865.png", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_1788.png", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_5128.png", isFavorite: false },
+            ],
+            "2024": [
+                { id: "2024-1", src: "/static/media/photos/IMG_9910.png", isFavorite: false },
+                { id: "2024-2", src: "/static/media/photos/IMG_9879.png", isFavorite: false },
+                { id: "2024-2", src: "/static/media/photos/IMG_9912.png", isFavorite: false },
+                { id: "2024-1", src: "/static/media/photos/IMG_5110_Original.png", isFavorite: false },
+                { id: "2024-2", src: "/static/media/photos/FullSizeRender_Original.png", isFavorite: false },
+                { id: "2024-2", src: "static/media/photos/IMG_9288.png", isFavorite: false },
+                { id: "2024-1", src: "/static/media/photos/IMG_9299.png", isFavorite: false },
+
+            ],
+            "2023": [
+                { id: "2021-1", src: "static/media/photos/IMG_0501_Original.png", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_0476_Original.jpg", isFavorite: false },
+                { id: "2021-2", src: "static/media/photos/IMG_1748_Original.png", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_4990_Original.jpg", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_0471_Original.jpg", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_0472_Original_Original.png", isFavorite: false },
+                { id: "2021-2", src: "static/media/photos/IMG_0468_Original.png", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_0460_Original.jpg", isFavorite: false },
+                { id: "2021-2", src: "static/media/photos/IMG_4977_Original_Original.jpg", isFavorite: false },
+                { id: "2021-2", src: "static/media/photos/IMG_0431_Original.jpg", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_0428_Original.jpg", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_1704_Original.jpg", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_0347_Original_Original.png", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_1633_Original.jpg", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_2350_Original.png", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_8979_Original.jpg", isFavorite: false },
+                { id: "2021-2", src: "static/media/photos/IMG_8975_Original.jpg", isFavorite: false },
+                { id: "2021-2", src: "static/media/photos/IMG_9050_Original.jpg", isFavorite: false },
+            ],
+            "2021": [
+                { id: "2021-1", src: "static/media/photos/IMG_5193_Original.jpg", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_5668_Original.jpg", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_5635_Original.jpg", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_4889_Original.jpg", isFavorite: false },
+                { id: "2021-2", src: "static/media/photos/IMG_4855_Original.jpg", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_4796_Original.jpg", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_3252_Original.jpg", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_3200_Original.jpg", isFavorite: false },
+                { id: "2021-2", src: "static/media/photos/IMG_3175_Original.jpg", isFavorite: false },
+                { id: "2021-2", src: "static/media/photos/IMG_1860_Original.jpg", isFavorite: false },
+                { id: "2021-1", src: "static/media/photos/IMG_1700_Original_Original.jpg", isFavorite: false },
+                { id: "2021-2", src: "static/media/photos/IMG_1494_Original_Original.jpg", isFavorite: false }
+            ],
+            "2020": [
+                { id: "2020-1", src: "/static/media/photos/62991278331__63BA184C-3FC5-44C9-9DD1-003B4838993D.JPG", isFavorite: true },
+                { id: "2020-1", src: "/static/media/photos/840C8CC3-896C-407B-8772-CB6BDAB3CDA8_Original.jpg", isFavorite: true },
+                { id: "2020-2", src: "/static/media/photos/31335F43-BDEF-4F5E-9C69-5E6B0E95DA60_Original.jpg", isFavorite: false }
+            ],
+            "2018": [
+                { id: "2016-2", src: "/static/media/photos/IMG_1405.JPG", isFavorite: false },
+                { id: "2013-2", src: "/static/media/photos/IMG_0663.JPG", isFavorite: false },
+                { id: "2013-2", src: "/static/media/photos/IMG_0634.JPG", isFavorite: false }
+            ],
+        };
+        
+        function renderPhotos() {
+            // Loop through each year
+            Object.keys(photosData).forEach(year => {
+                const photosGrid = document.querySelector(`.album-photos-grid[data-year="${year}"]`);
+                if (!photosGrid) return;
+                
+                // Clear existing content
+                photosGrid.innerHTML = '';
+                
+                // Loop through the photos for this year and create HTML for each photo
+                photosData[year].forEach(photo => {
+                    const photoHtml = `
+                        <div class="photo-item" data-id="${photo.id}">
+                            <img src="${photo.src}" alt="${photo.alt}">
+                            <div class="favorite-button">
+                                <svg class="heart-icon ${photo.isFavorite ? 'active' : ''}" 
+                                    viewBox="0 0 24 24" ${photo.isFavorite ? 'fill="currentColor"' : ''}>
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                                </svg>
+                            </div>
+                        </div>
+                    `;
+                    
+                    photosGrid.innerHTML += photoHtml;
+                });
+            });
+            
+            // Reattach event listeners
+            attachPhotoEventListeners();
+        }
+
+        // Attach event listeners to dynamically created elements
+        function attachPhotoEventListeners() {
+            // Photo clicking for lightbox
+            document.querySelectorAll('.photo-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    // Don't open lightbox if clicking on favorite button
+                    if (e.target.closest('.favorite-button')) return;
+                    
+                    const lightbox = document.getElementById('lightbox');
+                    const lightboxImg = document.querySelector('.lightbox-img');
+                    const img = this.querySelector('img');
+                    
+                    lightboxImg.src = img.src;
+                    lightboxImg.alt = img.alt;
+                    lightbox.classList.add('active');
+                });
+            });
+            
+            // Favorite button functionality
+            document.querySelectorAll('.favorite-button').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const heartIcon = this.querySelector('.heart-icon');
+                    const photoId = this.parentElement.dataset.id;
+                    
+                    // Update the UI
+                    heartIcon.classList.toggle('active');
+                    if (heartIcon.classList.contains('active')) {
+                        heartIcon.setAttribute('fill', 'currentColor');
+                    } else {
+                        heartIcon.removeAttribute('fill');
+                    }
+                    
+                    // Update the data - find the year and photo
+                    const [year, photoNum] = photoId.split('-');
+                    const index = parseInt(photoNum) - 1;
+                    
+                    if (photosData[year] && photosData[year][index]) {
+                        photosData[year][index].isFavorite = !photosData[year][index].isFavorite;
+                    }
+                });
+            });
+        }
+
+        // Initial render
+        renderPhotos();
+        
+        // Close lightbox
+        document.querySelector('.lightbox-close').addEventListener('click', function() {
+            document.getElementById('lightbox').classList.remove('active');
+        });
+        
+        // Close lightbox on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('lightbox').classList.contains('active')) {
+                document.getElementById('lightbox').classList.remove('active');
+            }
+        });
+        
+        // Window control buttons (just for show, not functional in this demo)
+        document.getElementById('close').addEventListener('click', function () {
+            window.close(); // Only works if the window was opened via script
+        });
+
+        document.getElementById('minimize').addEventListener('click', function () {
+            window.close(); // Simulated minimize by closing the window
+        });
+
+        document.getElementById('maximize').addEventListener('click', function () {
+            window.open('photos.html', '_blank'); // Open notes.html in a new tab
+        });
+
+    const allPhotos = document.querySelectorAll('.photo-card');
+    const favoritesBtn = document.getElementById('show-favorites');
+    const libraryBtn = document.getElementById('show-all');
+
+    // Show ONLY Favorites
+    favoritesBtn.addEventListener('click', () => {
+        allPhotos.forEach(photo => {
+            if (photo.getAttribute('data-is-favorite') === 'true') {
+                photo.style.display = 'block';
+            } else {
+                photo.style.display = 'none';
+            }
+        });
+        // UI feedback
+        favoritesBtn.classList.add('active');
+        libraryBtn.classList.remove('active');
+    });
+
+    // Show EVERYTHING
+    libraryBtn.addEventListener('click', () => {
+        allPhotos.forEach(photo => {
+            photo.style.display = 'block';
+        });
+        libraryBtn.classList.add('active');
+        favoritesBtn.classList.remove('active');
+    });
+    </script>
+</body>
+</html>

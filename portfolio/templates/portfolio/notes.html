@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="media/pinterest/bow.png">
+    <title>Mary's Notes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, 
+                Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body .notes-window {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background-color: #fff;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .window-header {
+            height: 28px;
+            background: linear-gradient(to bottom, #f0f0f0, #e1e1e1);
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            position: relative;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .window-buttons {
+            display: flex;
+            gap: 6px;
+            position: absolute;
+            left: 10px;
+        }
+
+        .window-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .close-button {
+            background-color: #ff5f57;
+            border: 1px solid #e0443e;
+        }
+
+        .minimize-button {
+            background-color: #ffbd2e;
+            border: 1px solid #dea123;
+        }
+
+        .maximize-button {
+            background-color: #28c941;
+            border: 1px solid #1aab29;
+        }
+
+        .window-title {
+            width: 100%;
+            text-align: center;
+            font-size: 13px;
+            color: #777;
+        }
+
+        .notes-content {
+            height: 100%;
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 15%;
+            max-width: 100%;
+            background-color: #f5f5f7;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .icloud-section {
+            padding: 15px 10px 5px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .folders-list {
+            list-style: none;
+        }
+
+        .folder-item {
+            display: flex;
+            align-items: center;
+            padding: 5px 10px;
+            font-size: 13px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .folder-item:hover {
+            background-color: #e5e5e5;
+        }
+
+        .folder-item.active {
+            background-color: #d1d1d6;
+        }
+
+        .folder-icon {
+            color: #ffcc00;
+            margin-right: 8px;
+            width: 16px;
+            text-align: center;
+        }
+
+        .folder-name {
+            flex: 1;
+        }
+
+        .folder-count {
+            font-size: 12px;
+            color: #999;
+            margin-left: 5px;
+        }
+
+        .tags-section {
+            padding: 15px 10px 5px;
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        .tags-list {
+            padding: 5px 10px;
+        }
+
+        .tag-item {
+            display: inline-block;
+            background-color: #ebebeb;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #555;
+            margin: 3px;
+            cursor: pointer;
+        }
+
+        .tag-item:hover {
+            background-color: #dedede;
+        }
+
+        .tag-item.active {
+            background-color: #575757;
+            color: white;
+        }
+
+        .new-folder-btn {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin-top: auto;
+            font-size: 13px;
+            color: #777;
+            border-top: 1px solid #e0e0e0;
+            cursor: pointer;
+        }
+
+        .new-folder-btn:hover {
+            background-color: #e5e5e5;
+        }
+
+        .notes-list {
+            min-width: 20%;
+            width: 20%;
+            background-color: #f9f9f9;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+        }
+
+        .search-bar {
+            padding: 10px;
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 12px;
+        }
+
+        .note-items {
+            list-style: none;
+        }
+
+        .note-item {
+            padding: 10px;
+            border-bottom: 1px solid #eaeaea;
+            cursor: pointer;
+        }
+
+        .note-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .note-item.active {
+            background-color: #e6e6e6;
+        }
+
+        .note-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+        }
+
+        .note-title .tag {
+            font-size: 11px;
+            color: #777;
+            margin-left: 5px;
+        }
+
+        .note-title .lock-icon {
+            margin-left: 5px;
+            font-size: 11px;
+            color: #777;
+        }
+
+        .lock-icon img {
+            max-width: 6px ;
+        }
+
+        .note-date {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .note-preview {
+            font-size: 12px;
+            color: #777;
+            line-height: 1.3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .note-editor {
+            flex: 1;
+            min-width: 50%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative; /* Add this to contain the absolute positioned elements */
+        }
+
+        .editor-toolbar {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .toolbar-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .toolbar-button {
+            width: 20px;
+            height: 20px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            opacity: 0.6;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toolbar-button:hover {
+            opacity: 1;
+        }
+
+        .toolbar-separator {
+            height: 20px;
+            width: 1px;
+            background-color: #e0e0e0;
+            margin: 0 5px;
+        }
+
+        .editor-header {
+            padding: 15px 20px 5px;
+        }
+
+        .note-info {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .note-main-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .note-work-tag {
+            font-size: 14px;
+            color: #555;
+            background-color: #f3f3f3;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .editor-content {
+            flex: 1;
+            padding: 0 20px 20px;
+            overflow-y: auto;
+        }
+
+        .editor-list {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin-top: 15px;
+        }
+
+        .editor-list li {
+            font-size: 14px;
+            margin-bottom: 10px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        /* Locked note styles */
+        .locked-note-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 20px;
+            /* These two properties ensure it stays within the note-editor container */
+            position: absolute;
+            width: 100%;
+        }
+
+        .lock-icon-large {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: #aaa;
+        }
+
+        .locked-message {
+            font-size: 18px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 25px;
+        }
+
+        .view-button, .unlock-button{
+            background-color: #f3f3f3;
+            color: #FFCC00;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .view-button:hover, .unlock-button:hover{
+            color: #E5B700;
+
+        }
+
+        .password-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 8px 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+
+            outline:none;
+            background-color:#d3d3d359;
+            color:#ffffff;
+            border-radius:20px;
+            height:20px;
+            max-width: 200px;;
+            border-color: #ffffff00
+        }
+
+        .lock-note-button {
+            background-color: #f3f3f3;
+            border: 1px solid #ddd;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 15px;
+            cursor: pointer;
+        }
+
+        .lock-note-button:hover {
+            background-color: #e9e9e9;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .visible {
+            display: flex;
+        }
+
+        @media (max-width: 768px) {
+            .notes-window {
+                width: 95%;
+                height: 80vh;
+            }
+            
+            .sidebar {
+                width: 150px;
+            }
+            
+            .notes-list {
+                width: 200px;
+            }
+        }
+
+        #unlocked-content {
+            width: 100%;
+            height: 100%;
+        }
+        /* sobbing omfg */
+        .note-content {
+            min-height: 800px;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="notes-window">
+        <!-- Window Header -->
+        <div class="window-header">
+            <div class="window-buttons">
+                <div class="window-button close-button" id="close"></div>
+                <div class="window-button minimize-button" id="minimize"></div>
+                <div class="window-button maximize-button" id="maximize"></div>
+            </div>
+            <div class="window-title">Notes</div>
+        </div>
+        
+        <!-- Notes Content -->
+        <div class="notes-content">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="icloud-section">iCloud</div>
+                <ul class="folders-list">
+                    <li class="folder-item active">
+                        <span class="folder-icon">📁</span>
+                        <span class="folder-name">All iCloud</span>
+                        <span class="folder-count">529</span>
+                    </li>
+                </ul>
+                
+                <div class="tags-section">Tags</div>
+                <div class="tags-list">
+                    <div class="tag-item active">All Tags</div>
+                    <div class="tag-item">#receipt</div>
+                    <div class="tag-item">#shopping</div>
+                    <div class="tag-item">#todo</div>
+
+                </div>
+                
+                <div class="new-folder-btn">
+                    <span class="folder-icon">+</span>
+                    <span>New Folder</span>
+                </div>
+            </div>
+            
+            <!-- Notes List -->
+            <div class="notes-list">
+                <div class="search-bar">
+                    <input type="text" class="search-box" placeholder="Search">
+                </div>
+                
+                <ul class="note-items">
+    {% for note in notes %}
+    <li class="note-item {% if forloop.first %}active{% endif %}" data-note-id="{{ note.id }}">
+        <div class="note-title">
+            {{ note.title }}
+            {% if note.is_locked %}
+                <span class="lock-icon">
+                    <img src="/static/ui/lock.png" alt="">
+                </span>
+            {% endif %}
+        </div>
+
+        <div class="note-date">
+            {{ note.created_at|date:"M d, Y" }}
+        </div>
+
+        <div class="note-preview">
+            {{ note.body|truncatewords:10 }}
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+            </div>
+            
+            <!-- Note Editor -->
+            <div class="note-editor">
+                <!-- Toolbar -->
+                <div class="editor-toolbar">
+                    <div class="toolbar-buttons">
+                        <button class="toolbar-button">📋</button>
+                        <button class="toolbar-button">🔍</button>
+                        <div class="toolbar-separator"></div>
+                        <button class="toolbar-button">Aa</button>
+                        <button class="toolbar-button">📌</button>
+                        <button class="toolbar-button">📊</button>
+                        <div class="toolbar-separator"></div>
+                        <button class="toolbar-button">📎</button>
+                        <button class="toolbar-button">🔔</button>
+                        <button class="toolbar-button">📤</button>
+                        <button class="toolbar-button">🔍</button>
+                        <button class="lock-note-button hidden">Lock Note </button>
+                    </div>
+                </div>
+                                    {% for note in notes %}
+                <div id="note-{{ note.id }}" class="note-content {% if not forloop.first %}hidden{% endif %}">
+                    
+                    {% if note.is_locked %}
+                    <!-- LOCKED VIEW -->
+                    <div class="locked-note-container">
+                        <div class="lock-icon-large">
+                            <img src="/static/ui/lock.png" alt="">
+                        </div>
+                        <div class="locked-message">This note is locked.</div>
+                    </div>
+                    
+                    {% else %}
+                    <!-- NORMAL NOTE -->
+                    <div class="editor-header">
+                        <div class="note-info">
+                            {{ note.created_at }}
+                        </div>
+                        <div class="note-main-title">
+                            {{ note.title }}
+                        </div>
+                    </div>
+
+                    <div class="editor-content">
+                        {{ note.body|linebreaks }}
+                    </div>
+                    {% endif %}
+
+                </div>
+                {% endfor %}
+                    
+                    <!-- Unlocked content -->
+                    <div id="unlocked-content" class="hidden">
+                        <div class="editor-header">
+                            <div class="note-info">22 November 2021 at 09:15</div>
+                            <div class="note-main-title">Personal Journal</div>
+                        </div>
+                        
+                        <div class="editor-content">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add event listeners to highlight active folder and note items
+        const folderItems = document.querySelectorAll('.folder-item');
+        folderItems.forEach(item => {
+            item.addEventListener('click', () => {
+                folderItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+
+        const tagItems = document.querySelectorAll('.tag-item');
+        tagItems.forEach(item => {
+            item.addEventListener('click', () => {
+                tagItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+
+        // Handle note selection and display
+        const noteItems = document.querySelectorAll('.note-item');
+        const noteContents = document.querySelectorAll('.note-content');
+        const lockNoteButton = document.querySelector('.lock-note-button');
+
+        noteItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const noteId = item.getAttribute('data-note-id');
+                
+                // Update active note highlight
+                noteItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                
+                // Show selected note content
+                noteContents.forEach(content => {
+                    content.classList.add('hidden');
+                });
+                
+                // Make the selected note visible
+                document.getElementById(`note-${noteId}`).classList.remove('hidden');
+                
+                // Handle lock button visibility
+                if (noteId === '3' && document.getElementById('unlocked-content').classList.contains('visible')) {
+                    lockNoteButton.classList.remove('hidden');
+                } else {
+                    lockNoteButton.classList.add('hidden');
+                }
+                
+                // Make sure the sidebar and notes list remain visible
+                // This ensures the layout doesn't get affected when showing locked notes
+                document.querySelector('.sidebar').style.display = 'flex';
+                document.querySelector('.notes-list').style.display = 'block';
+            });
+        });
+
+        // Handle locked note functionality
+        const viewButton = document.getElementById('view-button');
+        const passwordContainer = document.getElementById('password-container');
+        const passwordInput = document.getElementById('password-input');
+        const unlockButton = document.getElementById('unlock-button');
+        const unlockedContent = document.getElementById('unlocked-content');
+        const lockedView = document.getElementById('locked-view');
+
+        viewButton.addEventListener('click', () => {
+            viewButton.classList.add('hidden');
+            passwordContainer.classList.add('visible');
+            passwordInput.focus();
+        });
+
+        unlockButton.addEventListener('click', checkPassword);
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+        function checkPassword() {
+            const password = passwordInput.value;
+            if (password === 'moon') {
+                unlockedContent.classList.remove('hidden');
+                unlockedContent.classList.add('visible');
+                lockedView.classList.add('hidden');
+                lockNoteButton.classList.remove('hidden');
+                passwordInput.value = '';
+            } else {
+                alert('Incorrect password!');
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        }
+
+        // Lock note button functionality
+        lockNoteButton.addEventListener('click', () => {
+            unlockedContent.classList.remove('visible');
+            unlockedContent.classList.add('hidden');
+            lockedView.classList.remove('hidden');
+            viewButton.classList.remove('hidden');
+            passwordContainer.classList.remove('visible');
+            lockNoteButton.classList.add('hidden');
+        });
+
+        // Back button to return to macbook screen
+        document.getElementById('close').addEventListener('click', function () {
+            window.close(); // Only works if the window was opened via script
+        });
+
+        document.getElementById('minimize').addEventListener('click', function () {
+            window.close(); // Simulated minimize by closing the window
+        });
+
+        document.getElementById('maximize').addEventListener('click', function () {
+            window.open('notes.html', '_blank'); // Open notes.html in a new tab
+        });
+
+        // Make window draggable
+        const windowHeader = document.querySelector('.window-header');
+        const notesWindow = document.querySelector('.notes-window');
+        let isDragging = false;
+        let offsetX, offsetY;
+
+        windowHeader.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            offsetX = e.clientX - notesWindow.getBoundingClientRect().left;
+            offsetY = e.clientY - notesWindow.getBoundingClientRect().top;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            const x = e.clientX - offsetX;
+            const y = e.clientY - offsetY;
+            
+            notesWindow.style.position = 'absolute';
+            notesWindow.style.left = `${x}px`;
+            notesWindow.style.top = `${y}px`;
+            notesWindow.style.transform = 'none';
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+    </script>
+</body>
+</html>

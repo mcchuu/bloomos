@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Mac window header */
+        .window-header {
+            height: 28px;
+            background: #111111;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            position: relative;
+        }
+
+        .window-buttons {
+            display: flex;
+            gap: 6px;
+            position: absolute;
+            left: 10px;
+        }
+
+        .window-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .close-button {
+            background-color: #ff5f57;
+            border: 1px solid #e0443e;
+        }
+
+        .minimize-button {
+            background-color: #ffbd2e;
+            border: 1px solid #dea123;
+        }
+
+        .maximize-button {
+            background-color: #28c941;
+            border: 1px solid #1aab29;
+        }
+
+        .window-navigation {
+            display: flex;
+            gap: 10px;
+            margin-left: 80px;
+        }
+        /* Main layout */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 28px - 90px); /* Subtract header and player heights */
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            border-radius: 20px;
+            background-color: #000;
+            margin-left: 15px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .logo {
+            padding: 10px 0;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: none; /* Hidden as per screenshot */
+        }
+
+        .library-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .library-title {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .create-button {
+            background: transparent;
+            border: none;
+            color: #b3b3b3;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .tab-navigation {
+            display: flex;
+            gap: 8px;
+            margin: 8px 0;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 8px;
+        }
+
+        .tab {
+            padding: 6px 12px;
+            border-radius: 20px;
+            background-color: #232323;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .playlist-item {
+            display: flex;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            align-items: center;
+        }
+
+        .playlist-item:hover {
+            background-color: #232323;
+        }
+
+        .playlist-image img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+            background-color: #333;
+            border-radius: 4px;
+        }
+
+        .playlist-info {
+            flex-grow: 1;
+        }
+
+        .playlist-name {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .playlist-meta {
+            font-size: 12px;
+            color: #b3b3b3;
+        }
+
+        /* Main content */
+        .content {
+            border-radius: 12px;
+            margin-left: 15px;
+            margin-right: 15px;
+            flex-grow: 1;
+            padding: 20px;
+            background: linear-gradient(to bottom, #33333380, #000);
+            overflow-y: auto;
+            background-color: #C4DAEF;
+
+        }
+
+        .search-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            display: flex;
+            align-items: center;
+            background-color: #242424;
+            border-radius: 20px;
+            padding: 8px 12px;
+            width: 364px;
+        }
+
+        .search-input input {
+            background: transparent;
+            border: none;
+            color: white;
+            width: 100%;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .profile-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: #535353;
+            margin-left: 10px;
+        }
+
+        /* Playlist header */
+        .playlist-header {
+            display: flex;
+            margin-bottom: 24px;
+        }
+
+        .playlist-cover {
+            width: 232px;
+            height: 232px;
+            margin-right: 24px;
+            gap: 4px;
+        }
+
+        .cover-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6.5px;
+        }
+
+        .playlist-details {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            
+        }
+
+        .playlist-label {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .playlist-title {
+            font-size: 96px;
+            font-weight: 900;
+            margin-bottom: 16px;
+            line-height: 1;
+        }
+
+        .playlist-stats {
+            font-size: 14px;
+            color: #b3b3b3;
+        }
+
+        /* Controls */
+        .playlist-controls {
+            display: flex;
+            align-items: center;
+            margin-top: 24px;
+            margin-bottom: 24px;
+        }
+
+        .play-button {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: #7492c0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            cursor: pointer;
+        }
+
+        .control-button {
+            width: 32px;
+            height: 32px;
+            background-color: transparent;
+            border: none;
+            color: #b3b3b3;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+        }
+
+        /* Songs table */
+        .songs-table {
+            width: 100%;
+            border-collapse: collapse;
+
+        }
+
+        .songs-table th {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #333;
+            color: #b3b3b3;
+            font-weight: normal;
+            position: sticky;
+            top: 0;
+        }
+
+        .songs-table td {
+            padding: 8px;
+            border-bottom: 1px solid #333;
+        }
+
+        .songs-table tr:hover {
+            background-color: #282828;
+        }
+
+        .song-title {
+            display: flex;
+            align-items: center;
+        }
+
+        .song-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 3px;
+            margin-right: 16px;
+        }
+
+        .song-info h3 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .song-artist {
+            font-size: 14px;
+            color: #b3b3b3;
+        }
+
+        .song-album {
+            color: #b3b3b3;
+        }
+
+        /* Player */
+        .player {
+            height: 90px;
+            background-color: #C4DAEF;
+            background-color: #181818;
+            border-top: 1px solid #282828;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            position: relative;
+        }
+
+        .now-playing {
+            display: flex;
+            align-items: center;
+            width: 30%;
+        }
+
+        .now-playing-image {
+            width: 56px;
+            height: 56px;
+            margin-right: 14px;
+        }
+
+        .now-playing-info h4 {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .now-playing-artist {
+            font-size: 12px;
+            color: #b3b3b3;
+        }
+
+        .player-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 40%;
+        }
+
+        .control-buttons {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .play-pause {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 16px;
+            cursor: pointer;
+        }
+
+        .player-timeline {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .timeline-time {
+            font-size: 12px;
+            color: #b3b3b3;
+            margin: 0 8px;
+        }
+
+        .timeline-bar {
+            flex-grow: 1;
+            height: 4px;
+            background-color: #535353;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .timeline-progress {
+            height: 100%;
+            background-color: #b3b3b3;
+            border-radius: 2px;
+            width: 12%;
+        }
+
+        .volume-controls {
+            width: 30%;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .volume-bar {
+            width: 100px;
+            height: 4px;
+            background-color: #535353;
+            border-radius: 2px;
+            margin-left: 8px;
+        }
+
+        .volume-level {
+            height: 100%;
+            background-color: #b3b3b3;
+            border-radius: 2px;
+            width: 70%;
+        }
+
+        /* Utility classes */
+        .active {
+            background-color: #333;
+        }
+
+        .text-highlight {
+            color: #7492c0;
+        }
+
+        .currently-playing {
+            color: #7492c0;
+        }
+
+        .currently-playing td {
+            color: #7492c0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mac window header -->
+    <div class="window-header">
+        <div class="window-buttons">
+            <div class="window-button close-button" id="close"></div>
+            <div class="window-button minimize-button" id="minimize"></div>
+            <div class="window-button maximize-button" id="maximize"></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">Spotify</div>
+            <div class="library-header">
+                <div class="library-title">Your Library</div>
+                <button class="create-button">+</button>
+            </div>
+            
+            
+            <div class="tab-navigation">
+                <div class="tab active">Playlists</div>
+                <div class="tab">By you</div>
+            </div>
+            
+            <div class="playlist-item">
+                <div class="playlist-image"><img src="/static/media/miffybow.jpg" alt=""></div>
+                <div class="playlist-info">
+                    <div class="playlist-name">moments</div>
+                </div>
+            </div>
+            
+            <div class="playlist-item">
+                
+                <div class="playlist-image"><img src="/static/media/744928808000af481fd9798ee652343b.jpg" alt=""></div>
+                <div class="playlist-info">
+                    <div class="playlist-name">introvert diaries</div>
+                </div>
+            </div>
+            
+            <div class="playlist-item">
+                <div class="playlist-image"><img src="/static/media/shoujo.jpg" alt=""></div>
+                <div class="playlist-info">
+                    <div class="playlist-name">shoujo ୨୧</div>
+                </div>
+            </div>
+            
+            <div class="playlist-item">
+                <div class="playlist-image"><img src="/static/media/88d595a5f1b6c065cc5a81a664ce325f (1).gif" alt=""></div>
+                <div class="playlist-info">
+                    <div class="playlist-name">petals of the moon</div>
+                </div>
+            </div>
+            
+            <div class="playlist-item">
+                <div class="playlist-image"><img src="/static/media/21c2b5290930ac167255e50bbadf31e5.jpg" alt=""></div>
+                <div class="playlist-info">
+                    <div class="playlist-name">k pop</div>
+                </div>
+            </div>
+            
+            <div class="playlist-item">
+                <div class="playlist-image"><img src="/static/media/02103f5f01ca04735e46787863dffd27.jpg" alt=""></div>
+                <div class="playlist-info">
+                    <div class="playlist-name">𝑚𝑎𝑔𝑛𝑜'𝒍𝒊𝒂</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main content -->
+        <div class="content">
+            <div class="search-header">
+                <div class="search-input">
+                    <input type="text" placeholder="What do you want to play?">
+                </div>
+                <div class="user-profile">
+                    
+                    <img src="/static/media/shuyii.png" style="width: 45px;">
+                </div>
+            </div>
+            
+            <div class="playlist-header">
+                <div class="playlist-cover">
+                    <img class="cover-image" src="/static/media/miffybow.jpg" alt="Cover 1">
+                </div>
+                <div class="playlist-details">
+                    <div class="playlist-label">Public Playlist</div>
+                    <h1 class="playlist-title">moments</h1>
+                    <div class="playlist-stats"> <img src="/static/media/shuyii.png" style="width: 20px">ㅤ· 21 songs, 1 hr 9 min</div>
+                </div>
+            </div>
+            
+            <div class="playlist-controls">
+                <div class="play-button">▶</div>
+                <div class="control-button">♥</div>
+                <div class="control-button">⋯</div>
+            </div>
+            
+            <table class="songs-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Title</th>
+                        <th>Album</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="currently-playing">
+                        <td>1</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/bewitched.jpeg" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>From The Start</h3>
+                                    <div class="song-artist">Laufey</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">Bewitched</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/minor.jpg" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>I miss you, I'm sorry</h3>
+                                    <div class="song-artist">Gracie Abrams</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">minor</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/typical.jpeg" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>Best Friend</h3>
+                                    <div class="song-artist">Laufey</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">Typical of Me EP</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/stuck.png" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>Stuck with U (with Justin Bieber)</h3>
+                                    <div class="song-artist">Ariana Grande, Justin Bieber</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">Stuck with U</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/sleepyhead.webp" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>Empty Bed</h3>
+                                    <div class="song-artist">Cavetown</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">Sleepyhead</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/k12.png" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>Recess</h3>
+                                    <div class="song-artist">Melanie Martinez</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">K-12</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/bewitched.jpeg" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>Letter To My 13 Year Old Self</h3>
+                                    <div class="song-artist">Laufey</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">Bewitched</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/eternal.png" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>intro (end of the world)</h3>
+                                    <div class="song-artist">Ariana Grande</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">eternal sunshine</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/home.webp" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>This is Home</h3>
+                                    <div class="song-artist">Laufey</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">This is Home</td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/cry.png" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>Cry</h3>
+                                    <div class="song-artist">Cigarettes After S</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">Cry</td>
+                    </tr>
+                    <tr>
+                        <td>11</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/cas.png" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>Apocalypse</h3>
+                                    <div class="song-artist">Cigarettes After S</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">Cigarettes After S</td>
+                    </tr>
+                    <tr>
+                        <td>12</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/sick.jpg" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>Sober</h3>
+                                    <div class="song-artist">Elita</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">Sick Girl</td>
+                    </tr>
+                    <tr>
+                        <td>13</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/typical.jpeg" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>Magnolia</h3>
+                                    <div class="song-artist">Laufey</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">Typical of Me EP</td>
+                    </tr>
+                    <tr>
+                        <td>14</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/eternal.png" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>we can't be friend (wait for your love)</h3>
+                                    <div class="song-artist">Ariana Grande</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">eternal sunshine</td>
+                    </tr>
+                    <tr>
+                        <td>15</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/thank.webp" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>ghostin</h3>
+                                    <div class="song-artist">Ariana Grande</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">thank u, next</td>
+                    </tr>
+                    <tr>
+                        <td>16</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/this.png" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>Older</h3>
+                                    <div class="song-artist">Gracie Abrams</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">This Is What It Feels Like</td>
+                    </tr>
+                    <tr>
+                        <td>16</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/eternal.png" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>Saturn Returns Interlude</h3>
+                                    <div class="song-artist">Ariana Grande</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">ethernal sunshine</td>
+                    </tr>
+                    <tr>
+                        <td>16</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/everything.jpg" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>Beautiful Stranger</h3>
+                                    <div class="song-artist">Laufey</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">Everything I Know About Love</td>
+                    </tr>
+                    <tr>
+                        <td>16</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/summer.jpg" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>seasons</h3>
+                                    <div class="song-artist">wave to earth</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">summer flows 0.02</td>
+                    </tr>
+                    <tr>
+                        <td>16</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/every.jpg" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>Every Night Finds a Dawn</h3>
+                                    <div class="song-artist">フルーツバスケット</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">フルーツバスケット OST</td>
+                    </tr>
+                    <tr>
+                        <td>16</td>
+                        <td>
+                            <div class="song-title">
+                                <img class="song-image" src="/static/music/scene.jpg" alt="Song cover">
+                                <div class="song-info">
+                                    <h3>end credits</h3>
+                                    <div class="song-artist">PRYVT</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="song-album">&SCENE</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Player -->
+
+    <script>
+        // Window control buttons (just for show, not functional in this demo)
+        document.getElementById('close').addEventListener('click', function () {
+            window.close(); // Only works if the window was opened via script
+        });
+
+        document.getElementById('minimize').addEventListener('click', function () {
+            window.close(); // Simulated minimize by closing the window
+        });
+
+        document.getElementById('maximize').addEventListener('click', function () {
+            window.open('spotify.html', '_blank'); // Open notes.html in a new tab
+        });
+    </script>
+</body>
+</html>

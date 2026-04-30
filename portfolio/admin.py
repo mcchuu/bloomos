@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Note, Photo, Track, GameActivity
-
+from .models import Note, Photo, Track, GameActivity, Book
 
 @admin.register(Note)
 class NoteAdmin(admin.ModelAdmin):
@@ -123,3 +122,11 @@ class GameActivityAdmin(admin.ModelAdmin):
             color, pct
         )
     completion_percentage.short_description = 'Complete'
+
+# portfolio/admin.py
+
+@admin.register(Book)
+class BookAdmin(admin.ModelAdmin):
+    # Remove 'status' from these two lists:
+    list_display = ('title', 'author', 'status')  # Change to ('title', 'author')
+    list_filter = ('status',)                     # Delete this line or change to ('author',)

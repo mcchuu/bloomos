@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="/static/media/bow.png">
+    <title>Liz's MacBook</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, 
+                Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: #ecf2ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .macbook-screen {
+            width: 90%;
+            max-width: 960px;
+            height: 540px;
+            background-image: url('/static/media/background5.jpg');
+            background-size: cover;
+            background-position: center;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(178, 200, 252, 0.5);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-bar {
+            width: 100%;
+            height: 28px;
+            background-color: rgba(255, 255, 255, 0.8);
+            background-color: #c1c3cc2a;
+            box-shadow: 0 0 10px #93959c79;
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 12px 12px 0 0;
+            padding: 0 15px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .menu-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-item {
+            color: grey;
+            font-size: 13px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .menu-item:hover {
+            color: #000;
+        }
+
+        .active-menu {
+            font-weight: 600;
+        }
+
+        .apple-logo {
+            width: 24px;
+            height: 16px;
+            margin-right: 8px;
+        }
+
+        .status-icons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.7;
+        }
+
+        .date-time {
+            font-size: 13px;
+            color: #333;
+            margin-left: 10px;
+        }
+
+        .desktop-content {
+            flex: 1;
+            padding: 20px;
+            position: relative;
+        }
+
+        .photo-gallery {
+            display: flex;
+            gap: 15px;
+            position: absolute;
+            right: 30px;
+        }
+
+        .photo {
+            height: 80px;
+            width: 80px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .photo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .music-player {
+            position: absolute;
+            bottom: 350px;
+            width: 280px;
+            left: 20px;
+            height: 60px;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .music-player:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .music-top {
+            display: flex;
+            height: 60px;
+            align-items: center;
+        }
+
+        .album-art {
+            height: 60px;
+            width: 60px;
+            border-radius: 8px 0 0 8px;
+            z-index: 2;
+        }
+
+        .track-info {
+            display: flex;
+            flex-direction: column;
+            padding: 8px 15px;
+            width: 280px;
+        }
+
+        .track-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .track-artist {
+            max-width: 200px;
+            font-size: 11px;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 6px;
+        }
+
+        .player-controls {
+            position: absolute;
+            top: 32%;
+            left: 73%;
+            max-width: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-right: 15px;
+        }
+
+        .control-button {
+            background: none;
+            border: none;
+            color: #cccccc;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .play-pause {
+            font-size: 18px;
+            width: 32px;
+            height: 32px;
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .play-pause:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .progress-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: rgba(100, 100, 100, 0.5);
+            cursor: pointer;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color:rgba(100, 100, 100, 0.5);
+            width: 0%;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            position: absolute;
+            width: 100%;
+            bottom: 6px;
+            font-size: 8px;
+            color: #cccccc;
+            padding: 0 10px;
+            pointer-events: none;
+        }
+
+        .dock-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            padding-bottom: 20px;
+        }
+
+        .dock {
+            background-color: #c1c3cc8a;
+            border-radius: 15px;
+            box-shadow: 0 0 10px #93959c79;
+            backdrop-filter: blur(10px);
+            border-radius: 18px;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .dock-item {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s, background-color 0.2s;
+            cursor: pointer;
+        }
+
+        .dock-item:hover {
+            transform: translateY(-8px) scale(1.1);
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .dock-item img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+
+        @media (max-width: 768px) {
+            .macbook-screen {
+                height: 90vh;
+                width: 95%;
+            }
+            
+            .photo-gallery {
+                top: 20px;
+                right: 20px;
+            }
+            
+            .music-player {
+                width: 250px;
+                right: 20px;
+            }
+            
+            .dock-item {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .dock-item img {
+                width: 35px;
+                height: 35px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="macbook-screen">
+        <!-- Menu Bar -->
+        <div class="menu-bar">
+            <div class="menu-left">
+                <img src="/static/ui/apple.png" alt="Apple Logo" class="apple-logo">
+                <div class="menu-item active-menu">Finder</div>
+                <div class="menu-item">File</div>
+                <div class="menu-item">Edit</div>
+                <div class="menu-item">View</div>
+                <div class="menu-item">Go</div>
+                <div class="menu-item">Window</div>
+                <div class="menu-item">Help</div>
+            </div>
+            
+            <div class="menu-right">
+                <div class="status-icons">
+                    <img src="/static/ui/wifi.png" alt="WiFi" class="status-icon">
+                    <img src="/static/ui/battery.png" alt="Battery" class="status-icon">
+                </div>
+                <div class="date-time">
+                    <span id="date">Mon, May 5</span>
+                    <span id="clock">12:00</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Desktop Content -->
+        <div class="desktop-content">
+            <!-- Photo Gallery -->
+            <div class="photo-gallery">
+                <img src="/static/media/88d595a5f1b6c065cc5a81a664ce325f (1).gif" alt="Photo 1" class="photo">
+                <img src="/static/media/86012981e8a4e917b89dcb0817b9c8d9.jpg" alt="Photo 2" class="photo">
+            </div>
+            
+            <!-- Music Player -->
+            <div class="music-player">
+                <div class="music-top">
+                    <img id="album-art" src="../static//static/music/bewitched.jpeg" alt="Album Cover" class="album-art">
+                    <div class="track-info">
+                        <div class="track-title" id="track-title">calla</div>
+                        <div class="track-artist" id="track-artist">wave to earth — 0.1 flaws and all</div>
+                    </div>
+                    <div class="player-controls">
+                        <button class="control-button" id="prev-button">⏮</button>
+                        <button class="control-button play-pause" id="play-pause-button">⏸</button>
+                        <button class="control-button" id="next-button">⏭</button>
+                    </div>
+                </div>
+                <div class="progress-container" id="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="time-display">
+                    <span id="current-time">2:00</span>
+                    <span id="duration">-2:18</span>
+                </div>
+            </div>            
+        </div>
+        
+        <!-- Dock -->
+        <div class="dock-container">
+            <div class="dock">
+                <a href="javascript:void(0);" class="dock-item">
+                    <img src="/static/ui/notioncal.png" alt="Photos">
+                </a>
+                <a href="javascript:void(0);" class="dock-item" onclick="window.open('/goodreads/', 'popupWindow', 'width=800,height=800,left=100,top=100,toolbar=no,scrollbars=no,resizable=no,menubar=no,status=no');">
+                    <img src="/static/ui/goodreads.webp" alt="Goodreads">
+                </a>
+                <a href="javascript:void(0);" class="dock-item" onclick="window.open('/files/', 'popupWindow', 'width=800,height=600,left=100,top=100,toolbar=no,scrollbars=no,resizable=no,menubar=no,status=no');">
+                    <img src="/static/ui/files.png" alt="Files">
+                </a>
+                <a href="javascript:void(0);" class="dock-item" onclick="window.open('/photos/', 'popupWindow', 'width=800,height=800,left=100,top=100,toolbar=no,scrollbars=no,resizable=no,menubar=no,status=no');">
+                    <img src="/static/ui/photos.png" alt="Photos">
+                </a>
+                <a href="javascript:void(0);" class="dock-item" onclick="window.open('/notes/', 'popupWindow', 'width=800,height=800,left=100,top=100,toolbar=no,scrollbars=no,resizable=no,menubar=no,status=no');">
+                    <img src="/static/ui/notes.png" alt="Notes">
+                </a>
+                <a href="javascript:void(0);" class="dock-item" onclick="window.open('/spotify/', 'popupWindow', 'width=1400,height=800,left=100,top=100,toolbar=no,scrollbars=no,resizable=no,menubar=no,status=no');">
+                    <img src="/static/ui/spotify.webp" alt="Notes">
+                </a>
+                <a href="javascript:void(0);" class="dock-item" onclick="window.open('/xbox/', 'popupWindow', 'width=1200,height=800,left=100,top=100,toolbar=no,scrollbars=no,resizable=no,menubar=no,status=no');">
+                    <img src="/static/ui/xbox1.png" alt="Notes">
+                </a>
+                <div class="dock-item">
+                    <img src="/static/ui/settings.webp" alt="Settings">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <script>
+        const playlist = [
+        {
+            title: "From The Start",
+            artist: "Laufey",
+            src: "//static/music/1.mp3",
+            cover: "/static/music/bewitched.jpeg"
+        },
+        {
+            title: "I miss you, I'm sorry",
+            artist: "Gracie Abrams",
+            src: "/static/music/2.mp3",
+            cover: "/static/music/minor.jpg"
+        },
+        {
+            title: "Best Friend",
+            artist: "Laufey",
+            src: "/static/music/4.mp3",
+            cover: "/static/music/typical.jpeg"
+        },
+        {
+            title: "Stuck with U",
+            artist: "Ariana Grande",
+            src: "/static/music/5.mp3",
+            cover: "/static/music/stuck.png"
+        },
+        {
+            title: "Empty Bed",
+            artist: "Cavetown",
+            src: "/static/music/6.mp3",
+            cover: "/static/music/sleepyhead.webp"
+        },
+        {
+            title: "Recess",
+            artist: "Melanie Martinez",
+            src: "/static/music/7.mp3",
+            cover: "/static/music/k12.png"
+        },
+        {
+            title: "Letter to my 13 Year old self",
+            artist: "Laufey",
+            src: "/static/music/8.mp3",
+            cover: "/static/music/bewitched.jpeg"
+        },
+        {
+            title: "intro (end of the world)",
+            artist: "Ariana Grande",
+            src: "/static/music/9.mp3",
+            cover: "/static/music/eternal.png"
+        },
+        {
+            title: "This Is Home",
+            artist: "Cavetown",
+            src: "/static/music/10.mp3",
+            cover: "/static/music/home.webp"
+        },
+        {
+            title: "Cry",
+            artist: "Cigarettes After S",
+            src: "/static/music/11.mp3",
+            cover: "/static/music/cry.png"
+        },
+        {
+            title: "Apocalypse",
+            artist: "Cigarettes After S",
+            src: "/static/music/12.mp3",
+            cover: "/static/music/cas.png"
+        },
+        {
+            title: "Sober",
+            artist: "Elita",
+            src: "/static/music/13.mp3",
+            cover: "/static/music/sick.jpg"
+        },
+        {
+            title: "Magnolia",
+            artist: "Laufey",
+            src: "/static/music/14.mp3",
+            cover: "/static/music/typical.jpeg"
+        },
+        {
+            title: "we can't be friends",
+            artist: "Ariana Grande",
+            src: "/static/music/15.mp3",
+            cover: "/static/music/eternal.png"
+        },
+        {
+            title: "ghostin",
+            artist: "Ariana Grande",
+            src: "/static/music/16.mp3",
+            cover: "/static/music/thank.webp"
+        },
+        {
+            title: "Older",
+            artist: "Gracie Abrams",
+            src: "/static/music/17.mp3",
+            cover: "/static/music/this.png"
+        },
+        {
+            title: "Saturn Returns Interlude",
+            artist: "Ariana Grande",
+            src: "/static/music/18.mp3",
+            cover: "/static/music/eternal.png"
+        },
+        {
+            title: "Beautiful Stranger",
+            artist: "Laufey",
+            src: "/static/music/19.mp3",
+            cover: "/static/music/everything.jpg"
+        },
+        {
+            title: "seasons",
+            artist: "wave to earth",
+            src: "/static/music/20.mp3",
+            cover: "/static/music/summer.jpg"
+        },
+        {
+            title: "Every Night Finds a Dawn",
+            artist: "横山 克",
+            src: "/static/music/21.mp3",
+            cover: "/static/music/every.jpg"
+        },
+        {
+            title: "end credits",
+            artist: "PRYVT",
+            src: "/static/music/22.mp3",
+            cover: "/static/music/scene.jpg"
+        },
+    ];
+
+    let currentTrackIndex = 0;
+    let isPlaying = false;
+    
+    // Get DOM elements
+    const audioPlayer = document.createElement("audio");
+    audioPlayer.volume = 0.5;
+    const trackTitle = document.getElementById("track-title");
+    const trackArtist = document.getElementById("track-artist");
+    const albumArt = document.getElementById("album-art");
+    const playPauseButton = document.getElementById("play-pause-button");
+    const prevButton = document.getElementById("prev-button");
+    const nextButton = document.getElementById("next-button");
+    const progressBar = document.getElementById("progress-bar");
+    const progressContainer = document.getElementById("progress-container");
+    const currentTimeDisplay = document.getElementById("current-time");
+    const durationDisplay = document.getElementById("duration");
+    
+    // Add this function to petals.html inside the <script> tag just before the loadTrack function
+    function updateSpotifyDisplay(track) {
+        // Try to access spotify.html if it's open
+        try {
+            const spotifyWindow = window.frames.find(frame => frame.document.title === "Spotify");
+            if (spotifyWindow) {
+                // Update currently playing in Spotify
+                const nowPlayingImage = spotifyWindow.document.querySelector('.now-playing-image');
+                const nowPlayingTitle = spotifyWindow.document.querySelector('.now-playing-info h4');
+                const nowPlayingArtist = spotifyWindow.document.querySelector('.now-playing-artist');
+                
+                if (nowPlayingImage && nowPlayingTitle && nowPlayingArtist) {
+                    nowPlayingImage.src = track.cover;
+                    nowPlayingTitle.textContent = track.title;
+                    nowPlayingArtist.textContent = track.artist;
+                }
+                
+                // Update the highlighted row in the songs table
+                const rows = spotifyWindow.document.querySelectorAll('.songs-table tbody tr');
+                rows.forEach(row => {
+                    row.classList.remove('currently-playing');
+                    const songTitle = row.querySelector('.song-info h3')?.textContent;
+                    if (songTitle === track.title) {
+                        row.classList.add('currently-playing');
+                    }
+                });
+            }
+        } catch (e) {
+            // Spotify window might not be open or accessible
+            console.log("Could not update Spotify window:", e);
+        }
+    }
+    // Load and play a track
+    // Find this function in petals.html and update it to include the updateSpotifyDisplay call
+    function loadTrack(index) {
+        const track = playlist[index];
+        trackTitle.textContent = track.title;
+        trackArtist.textContent = track.artist;
+        audioPlayer.src = track.src;
+        albumArt.src = track.cover;
+        
+        // Reset progress
+        progressBar.style.width = "0%";
+        currentTimeDisplay.textContent = "0:00";
+        
+        // Update Spotify if it's open
+        updateSpotifyDisplay(track);
+        
+        // If isPlaying is true, start the new track
+        if (isPlaying) {
+            audioPlayer.play();
+            playPauseButton.textContent = "⏸";
+        }
+    }
+
+            // Format time in MM:SS
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+    
+    // Format remaining time with negative sign
+    function formatRemainingTime(totalSeconds, currentSeconds) {
+        const remaining = totalSeconds - currentSeconds;
+        const mins = Math.floor(remaining / 60);
+        const secs = Math.floor(remaining % 60);
+        return `-${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    // Update progress bar and time displays
+    function updateProgress() {
+        const duration = audioPlayer.duration || 0;
+        const currentTime = audioPlayer.currentTime || 0;
+        const progressPercent = (currentTime / duration) * 100;
+        
+        progressBar.style.width = `${progressPercent}%`;
+        currentTimeDisplay.textContent = formatTime(currentTime);
+        durationDisplay.textContent = formatRemainingTime(duration, currentTime);
+    }
+
+    // Set progress bar when clicked
+    function setProgress(e) {
+        const width = this.clientWidth;
+        const clickX = e.offsetX;
+        const duration = audioPlayer.duration;
+        audioPlayer.currentTime = (clickX / width) * duration;
+    }
+
+    // Play/Pause toggle
+    // Modify this function in petals.html
+    function togglePlayPause() {
+        if (audioPlayer.paused) {
+            audioPlayer.play();
+            playPauseButton.textContent = "⏸";
+            isPlaying = true;
+        } else {
+            audioPlayer.pause();
+            playPauseButton.textContent = "▶";
+            isPlaying = false;
+        }
+        
+        // Try to update play/pause button in Spotify
+        try {
+            const spotifyWindow = window.frames.find(frame => frame.document.title === "Spotify");
+            if (spotifyWindow) {
+                const spotifyPlayPause = spotifyWindow.document.querySelector('.play-pause span');
+                if (spotifyPlayPause) {
+                    spotifyPlayPause.textContent = isPlaying ? "⏸" : "▶";
+                }
+            }
+        } catch (e) {
+            console.log("Could not update Spotify play/pause state:", e);
+        }
+    }
+
+    // Skip to previous track
+    function prevTrack() {
+        currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+        isPlaying = true; // force autoplay on skip
+        loadTrack(currentTrackIndex);
+    }
+
+    // Skip to next track
+    function nextTrack() {
+        currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+        isPlaying = true; // force autoplay on skip
+        loadTrack(currentTrackIndex);
+    }
+
+    // Event listeners
+    audioPlayer.addEventListener("timeupdate", updateProgress);
+    audioPlayer.addEventListener("ended", nextTrack);
+    audioPlayer.addEventListener("loadedmetadata", () => {
+        durationDisplay.textContent = formatTime(audioPlayer.duration);
+    });
+    
+    progressContainer.addEventListener("click", setProgress);
+    playPauseButton.addEventListener("click", togglePlayPause);
+    prevButton.addEventListener("click", prevTrack);
+    nextButton.addEventListener("click", nextTrack);
+
+    // Load the first track
+    loadTrack(currentTrackIndex);
+
+    // Enable autoplay on load
+    isPlaying = true;
+    audioPlayer.play().catch(error => {
+        console.log("Autoplay failed (browser might block it until user interacts):", error);
+    });
+
+
+
+    // Update date and time
+    function updateDateTime() {
+        const now = new Date();
+        
+        // Format date: Mon, May 5
+        const options = { weekday: 'short', month: 'short', day: 'numeric' };
+        const dateString = now.toLocaleDateString('en-US', options);
+        document.getElementById('date').textContent = dateString;
+        
+        // Format time: 13:45
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const timeString = `${hours}:${minutes}`;
+        document.getElementById('clock').textContent = timeString;
+    }
+    
+    // Update initially and then every second
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+    
+    // Add dock hover effect
+    const dock = document.querySelector('.dock');
+    const dockItems = document.querySelectorAll('.dock-item');
+    
+    dockItems.forEach(item => {
+        item.addEventListener('mouseenter', () => {
+            dockItems.forEach(otherItem => {
+                if (otherItem !== item) {
+                    otherItem.style.transform = 'scale(0.95)';
+                }
+            });
+        });
+        
+        item.addEventListener('mouseleave', () => {
+            dockItems.forEach(otherItem => {
+                otherItem.style.transform = '';
+            });
+        });
+    });
+    </script>
+</body>
+</html>

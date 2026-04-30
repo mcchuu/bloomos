@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Files - iCloud Drive</title>
+    <style>
+        :root {
+            --sidebar-bg: #f5f5f7;
+            --header-bg: #f5f5f7;
+            --border-color: #e0e0e0;
+            --folder-color: #5ac8fa;
+            --text-color: #333;
+            --selected-bg: #e8e8e8;
+            --active-dot: #32d74b;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: white;
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .window {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .titlebar {
+            height: 35px;
+            background-color: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+        }
+        
+        .traffic-lights {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .traffic-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .close {
+            background-color: #ff5f57;
+        }
+        
+        .minimize {
+            background-color: #febc2e;
+        }
+        
+        .maximize {
+            background-color: #28c840;
+        }
+        
+        .content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 200px;
+            background-color: var(--sidebar-bg);
+            padding: 10px 0;
+            overflow-y: auto;
+            border-right: 1px solid var(--border-color);
+        }
+        
+        .sidebar-section {
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-header {
+            font-size: 11px;
+            color: #888;
+            padding: 5px 20px;
+            margin-top: 10px;
+        }
+        
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 5px 20px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .sidebar-item:hover {
+            background-color: var(--selected-bg);
+        }
+        
+        .sidebar-item.active {
+            background-color: var(--selected-bg);
+        }
+        
+        .sidebar-item img {
+            width: 16px;
+            height: 16px;
+            margin-right: 10px;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .toolbar {
+            height: 50px;
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            justify-content: space-between;
+        }
+        
+        .toolbar-left {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .toolbar-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .view-options button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .search {
+            background-color: var(--selected-bg);
+            border-radius: 4px;
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
+            color: #666;
+        }
+        
+        .files-container {
+            flex: 1;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 20px;
+            overflow-y: auto;
+        }
+        
+        .file-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .file-item:hover {
+            background-color: var(--selected-bg);
+        }
+        
+        .file-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 5px;
+            position: relative;
+        }
+        
+        .file-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .folder-icon {
+            fill: var(--folder-color);
+            width: 100%;
+            height: 100%;
+        }
+        
+        .document-icon {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .status-dot {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--active-dot);
+            border-radius: 50%;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .file-name {
+            font-size: 12px;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            width: 80%;
+            max-width: 700px;
+            height: 70%;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .modal-title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .window-header {
+            height: 28px;
+            background: linear-gradient(to bottom, #f0f0f0, #e1e1e1);
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            position: relative;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .window-buttons {
+            display: flex;
+            gap: 6px;
+            position: absolute;
+            left: 10px;
+        }
+
+        .window-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .close-button {
+            background-color: #ff5f57;
+            border: 1px solid #e0443e;
+        }
+
+        .minimize-button {
+            background-color: #ffbd2e;
+            border: 1px solid #dea123;
+        }
+
+        .maximize-button {
+            background-color: #28c941;
+            border: 1px solid #1aab29;
+        }
+    </style>
+</head>
+<body>
+    <div class="window">
+        <div class="titlebar">
+                <div class="window-buttons">
+                    <div class="window-button close-button" id="close"></div>
+                    <div class="window-button minimize-button" id="minimize"></div>
+                    <div class="window-button maximize-button" id="maximize"></div>
+                </div>
+        </div>
+        <div class="content">
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-item">iCloud</div>
+                    <div class="sidebar-item active">
+                        <svg class="sidebar-icon" width="16" height="16" viewBox="0 0 24 24">
+                            <path fill="#5ac8fa" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
+                        </svg>
+                        iCloud Drive
+                    </div>
+                    <div class="sidebar-item">
+                        <svg class="sidebar-icon" width="16" height="16" viewBox="0 0 24 24">
+                            <path fill="#999" d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
+                        </svg>
+                        Shared
+                    </div>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-header">Favorites</div>
+                    <div class="sidebar-item">
+                        <svg class="sidebar-icon" width="16" height="16" viewBox="0 0 24 24">
+                            <path fill="#999" d="M16.5 5c-1.54 0-3.04.99-3.56 2.36h-1.87C10.54 5.99 9.04 5 7.5 5 5.5 5 4 6.5 4 8.5c0 2.89 3.14 5.74 7.9 10.05l.1.1.1-.1C16.86 14.24 20 11.39 20 8.5c0-2-1.5-3.5-3.5-3.5z"/>
+                        </svg>
+                        AirDrop
+                    </div>
+                    <div class="sidebar-item">
+                        <svg class="sidebar-icon" width="16" height="16" viewBox="0 0 24 24">
+                            <path fill="#999" d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
+                            <path fill="#999" d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                        </svg>
+                        Recents
+                    </div>
+                    <div class="sidebar-item">
+                        <svg class="sidebar-icon" width="16" height="16" viewBox="0 0 24 24">
+                            <path fill="#999" d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/>
+                        </svg>
+                        Applications
+                    </div>
+                    <div class="sidebar-item">
+                        <svg class="sidebar-icon" width="16" height="16" viewBox="0 0 24 24">
+                            <path fill="#999" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        </svg>
+                        Desktop
+                    </div>
+                    <div class="sidebar-item">
+                        <svg class="sidebar-icon" width="16" height="16" viewBox="0 0 24 24">
+                            <path fill="#999" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                        </svg>
+                        Documents
+                    </div>
+                    <div class="sidebar-item">
+                        <svg class="sidebar-icon" width="16" height="16" viewBox="0 0 24 24">
+                            <path fill="#999" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+                        </svg>
+                        Downloads
+                    </div>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-header">Locations</div>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-header">Tags</div>
+                </div>
+            </div>
+            <div class="main-content">
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <div class="location-title">iCloud Drive</div>
+                    </div>
+                    <div class="toolbar-right">
+                        <div class="view-options">
+                            <button>&#9783;</button>
+                            <button>&#9776;</button>
+                        </div>
+                        <div class="share-button">&#8593;</div>
+                        <div class="more-button">&#8943;</div>
+                    </div>
+                </div>
+                <div class="files-container">
+                    <!-- Folders -->
+                    <div class="file-item" onclick="openModal('Personal', 'This folder contains personal files.')">
+                        <div class="file-icon">
+                            <svg class="folder-icon" viewBox="0 0 24 24">
+                                <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                            </svg>
+                        </div>
+                        <div class="file-name">personal</div>
+                    </div>
+                    <div class="file-item" onclick="openModal('Invoices', 'This folder contains school files.')">
+                        <div class="file-icon">
+                            <svg class="folder-icon" viewBox="0 0 24 24">
+                                <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                            </svg>
+                        </div>
+                        <div class="file-name">school</div>
+                    </div>
+                    
+                    <!-- Documents -->
+                    <div class="file-item" onclick="openModal('1337 Letter', 'Dear Mr. McCuen,')">
+                        <div class="file-icon">
+                            <img src="/static/ui/file.png" class="document-icon">
+                        </div>
+                        <div class="file-name">1337Letter.pdf</div>
+                    </div>
+                    <div class="file-item" onclick="openModal('Personal Narrative', 'Liz <br>Ms. Gilmore<br>English 1 Honor<br>17 March 2022<br><br>My home is with you<br><br> this pdf is too large to be previewed.')">
+                        <div class="file-icon">
+                            <img src="/static/ui/file.png" class="document-icon">
+                        </div>
+                        <div class="file-name">personalNarrative.pdf</div>
+                    </div>
+                    <div class="file-item" onclick="openModal('1337 Letter.pdf')">
+                        <div class="file-icon">
+                            <img src="/static/ui/file.png" class="document-icon">
+                        </div>
+                        <div class="file-name">Annual Report.pdf</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal -->
+    <div id="fileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">File Name</div>
+                <button class="close-button" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                File content will appear here.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to open the modal
+        function openModal(title, content) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalBody').innerHTML = content;
+            document.getElementById('fileModal').style.display = 'flex';
+        }
+        
+        // Function to close the modal
+        function closeModal() {
+            document.getElementById('fileModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('fileModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Window control buttons (just for show, not functional in this demo)
+        document.getElementById('close').addEventListener('click', function () {
+            window.close(); // Only works if the window was opened via script
+        });
+
+        document.getElementById('minimize').addEventListener('click', function () {
+            window.close(); // Simulated minimize by closing the window
+        });
+
+        document.getElementById('maximize').addEventListener('click', function () {
+            window.open('files.html', '_blank'); // Open notes.html in a new tab
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{% static 'media/pinterest/bow.png' %}">
+    <title>xbox</title>
+    <style>
+        /* [YOUR ORIGINAL STYLING - FULLY PRESERVED] */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #151515;
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .window-header {
+            height: 32px;
+            background-color: #252525;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+            position: relative;
+            border-bottom: 1px solid #333;
+        }
+
+        .window-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .window-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .close-button { background-color: #ff5f57; }
+        .minimize-button { background-color: #ffbd2e; }
+        .maximize-button { background-color: #28c941; }
+
+        .app-container {
+            display: flex;
+            height: calc(100vh - 32px);
+        }
+
+        .sidebar {
+            width: 60px;
+            background-color: #151515;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            border-right: 1px solid #333;
+        }
+
+        .sidebar-item {
+            width: 100%;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 20px;
+            color: #8e8e8e;
+            transition: color 0.2s;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            color: white;
+            background-color: #2d2d2d;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+            position: relative;
+            background-image: url('media/background5.jpg');
+            background: linear-gradient(to bottom, #7bb6ff36, #000);
+
+        }
+
+        .profile-container {
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 2px solid #107C10;
+            padding: 3px;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .gamertag {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .tabs-navigation {
+            display: flex;
+            border-bottom: 1px solid #333;
+            margin-bottom: 30px;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            color: #8e8e8e;
+            position: relative;
+        }
+
+        .tab.active {
+            color: white;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: white;
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .game-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background-color: rgba(45, 45, 45, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: background 0.2s;
+        }
+
+        .game-item:hover {
+            background-color: rgba(60, 60, 60, 0.8);
+        }
+
+        .game-cover {
+            width: 80px;
+            height: 80px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .game-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .game-details {
+            flex: 1;
+        }
+
+        .game-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .progress-container {
+            width: 100%;
+            max-width: 300px;
+            height: 4px;
+            background-color: #333;
+            border-radius: 2px;
+            margin-bottom: 5px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #107C10;
+            border-radius: 2px;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: #8e8e8e;
+        }
+
+        .feed-post {
+            background-color: rgba(45, 45, 45, 0.5);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="window-header">
+        <div class="window-buttons">
+            <div class="window-button close-button" id="close"></div>
+            <div class="window-button minimize-button" id="minimize"></div>
+            <div class="window-button maximize-button" id="maximize"></div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-item active">🏠</div>
+            <div class="sidebar-item">👤</div>
+            <div class="sidebar-item">🎮</div>
+            <div class="sidebar-item">👥</div>
+            <div class="sidebar-item">⚙️</div>
+        </div>
+
+        <div class="main-content">
+            <div class="profile-container">
+                <div class="profile-header">
+                    <div class="profile-info">
+                        <div class="profile-avatar">
+                            <img src="{% static 'media/rebirth.jpg' %}" alt="Avatar">
+                        </div>
+                        <div>
+                            <div class="gamertag">miffypetals</div>
+                            <div style="color: #8e8e8e;">12,450 G</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tabs-navigation">
+                    <div class="tab active" data-tab="games">GAMES</div>
+                    <div class="tab" data-tab="posts">POSTS</div>
+                </div>
+
+                <div id="games-content" class="content-section active">
+                    {% for game in games %}
+                    <div class="game-item">
+                        <div class="game-cover">
+                            {% if game.cover %}
+                                <img src="{{ game.cover.url }}" alt="{{ game.title }}">
+                            {% else %}
+                                <img src="{% static 'media/xbox/minecraft.jpg' %}" alt="Default">
+                            {% endif %}
+                        </div>
+                        <div class="game-details">
+                            <div class="game-title">{{ game.title }}</div>
+                            
+                            {% if game.achievements_total > 0 %}
+                                {% widthratio game.achievements_earned game.achievements_total 100 as percent %}
+                            {% else %}
+                                {% with "0" as percent %}{% endwith %}
+                            {% endif %}
+                            
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: {{ percent }}%"></div>
+                            </div>
+                            <div class="progress-text">{{ game.achievements_earned }}/{{ game.achievements_total }} Achievements ({{ percent }}%)</div>
+                        </div>
+                    </div>
+                    {% empty %}
+                        <div class="game-item">No games found in the database.</div>
+                    {% endfor %}
+                </div>
+
+                <div id="posts-content" class="content-section">
+                    <div class="feed-post">
+                        <p style="margin-bottom: 15px;">Recorded a clip in Valorant</p>
+                        <video controls style="width: 100%; border-radius: 4px;">
+                            <source src="{% static 'media/xbox/valorant1.mp4' %}" type="video/mp4">
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Window Controls
+        document.getElementById('close').addEventListener('click', () => window.close());
+        document.getElementById('minimize').addEventListener('click', () => window.close());
+        document.getElementById('maximize').addEventListener('click', () => window.open(window.location.href, '_blank'));
+
+        // Tab Functionality
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                tabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                const tabName = this.getAttribute('data-tab');
+                document.getElementById(`${tabName}-content`).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

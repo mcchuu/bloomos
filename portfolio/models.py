@@ -76,3 +76,26 @@ class GameActivity(models.Model):
             return 0
         return round((self.achievements_earned / self.achievements_total) * 100, 1)
     completion_percentage.short_description = 'Completion %'
+
+
+# portfolio/models.py
+
+class Book(models.Model):
+    title = models.CharField(max_length=200)
+    author = models.CharField(max_length=200)
+    cover = models.ImageField(upload_to='books/', blank=True, null=True)
+    rating = models.IntegerField(default=5)
+    date_finished = models.DateField()
+    
+    # Add this line here!
+    STATUS_CHOICES = [
+        ('reading', 'Currently Reading'),
+        ('read', 'Read'),
+        ('want', 'Want to Read'),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='read')
+    
+    review = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.title

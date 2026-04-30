@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goodreads | bloomOS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Georgia', serif; /* Classic book feel */
+        }
+
+        body {
+            background-color: #f4f1ea; /* Goodreads signature cream color */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Window Header */
+        .window-header {
+            height: 32px;
+            background-color: #382110;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            border-bottom: 1px solid #2a180c;
+        }
+
+        .window-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .window-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .close-button { background:#ff5f57; }
+        .minimize-button { background:#ffbd2e; }
+        .maximize-button { background:#28c941; }
+
+        .app-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 200px;
+            background-color: #ffffff;
+            border-right: 1px solid #d8d8d8;
+            padding: 20px 0;
+        }
+
+        .sidebar-item {
+            padding: 10px 20px;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            background-color: #f4f1ea;
+            font-weight: bold;
+            color: #382110;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            font-size: 24px;
+            color: #382110;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #d8d8d8;
+            padding-bottom: 10px;
+        }
+
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 25px;
+        }
+
+        .book-card {
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .book-cover {
+            width: 100%;
+            aspect-ratio: 2/3;
+            background-color: #ddd;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 2px;
+            margin-bottom: 10px;
+            object-fit: cover;
+        }
+
+        .book-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            line-height: 1.2;
+        }
+
+        .book-author {
+            font-size: 12px;
+            color: #777;
+            margin-top: 4px;
+        }
+
+        .stars {
+            color: #ffcc00;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="window-header">
+        <div class="window-buttons">
+            <div class="window-button close-button" onclick="window.close()"></div>
+            <div class="window-button minimize-button"></div>
+            <div class="window-button maximize-button"></div>
+        </div>
+        <div style="margin-left: auto; color: white; font-size: 12px; padding-right: 10px;">Goodreads</div>
+    </div>
+
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-item active">Currently Reading</div>
+            <div class="sidebar-item">Read</div>
+            <div class="sidebar-item">Want to Read</div>
+            <div class="sidebar-item">Favorites</div>
+        </div>
+
+        <div class="main-content">
+            <h1 class="section-title">My Bookshelf</h1>
+
+            <div class="book-grid">
+                {% for book in books %}
+                <div class="book-card">
+                    {% if book.cover %}
+                        <img src="{{ book.cover.url }}" class="book-cover" alt="{{ book.title }}">
+                    {% else %}
+                        <div class="book-cover" style="display:flex; align-items:center; justify-content:center; background:#eee;">📖</div>
+                    {% endif %}
+                    
+                    <div class="book-title">{{ book.title }}</div>
+                    <div class="book-author">by {{ book.author }}</div>
+                    
+                    <div class="stars">
+                        {% if book.rating == 5 %} ★★★★★
+                        {% elif book.rating == 4 %} ★★★★☆
+                        {% elif book.rating == 3 %} ★★★☆☆
+                        {% else %} ★★☆☆☆
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <p style="color: #777; font-style: italic;">Your bookshelf is currently empty. </p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
